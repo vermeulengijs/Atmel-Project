@@ -1,0 +1,366 @@
+
+Project2.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000198  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .comment      00000030  00000000  00000000  000001ec  2**0
+                  CONTENTS, READONLY
+  2 .debug_aranges 00000038  00000000  00000000  0000021c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  3 .debug_info   000002d2  00000000  00000000  00000254  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_abbrev 000001ac  00000000  00000000  00000526  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_line   000001b9  00000000  00000000  000006d2  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_frame  00000070  00000000  00000000  0000088c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_str    000001ad  00000000  00000000  000008fc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_loc    000001b3  00000000  00000000  00000aa9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_ranges 00000028  00000000  00000000  00000c5c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d4 e0       	ldi	r29, 0x04	; 4
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 97 00 	call	0x12e	; 0x12e <main>
+  64:	0c 94 ca 00 	jmp	0x194	; 0x194 <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <Configuration>:
+}
+void Configuration()
+{
+
+	// USART
+	UBRRH = (BAUD_PRESCALE >> 8);									 // Load upper 8-bits of the baud rate value into the high byte of the UBRR register
+  6c:	10 bc       	out	0x20, r1	; 32
+	UBRRL = BAUD_PRESCALE;											 // Load lower 8-bits of the baud rate value into the low byte of the UBRR register
+  6e:	8c e0       	ldi	r24, 0x0C	; 12
+  70:	89 b9       	out	0x09, r24	; 9
+	UCSRB = bit(RXEN)|bit(TXEN);								 // Turn on the transmission and reception circuitry
+  72:	88 e1       	ldi	r24, 0x18	; 24
+  74:	8a b9       	out	0x0a, r24	; 10
+	UCSRC = bit(URSEL)|(1<<UCSZ0)|bit(UCSZ1)|bit(USBS)| bit(UCSZ2);				 // USBS ( keuze voor hoeveel stop bits) UCSZ[2:0] dienen voor hoeveel data bits er zijn ( 8 )
+  76:	8e e8       	ldi	r24, 0x8E	; 142
+  78:	80 bd       	out	0x20, r24	; 32
+	// omdat we gebruik maken van de interne clock en zo voor ASYNCHRONE normal mode gebruik maken (voor de baud rate) --> UBRRH en UCSRC delen I/O locaties
+	// Hiervoor moet de URSEL bit hoog gemaakt worden
+		DDRA |= 0xff;
+  7a:	8a b3       	in	r24, 0x1a	; 26
+  7c:	8f ef       	ldi	r24, 0xFF	; 255
+  7e:	8a bb       	out	0x1a, r24	; 26
+		DDRB |= 0xff; //  0b11111111 set alle pinnen op poort C als uitgang
+  80:	97 b3       	in	r25, 0x17	; 23
+  82:	87 bb       	out	0x17, r24	; 23
+		DDRC |= 0xff; //  0b11111111 set alle pinnen op poort C als uitgang
+  84:	94 b3       	in	r25, 0x14	; 20
+  86:	84 bb       	out	0x14, r24	; 20
+		DDRD |= 0xf0; //  0b11110000		of bit(7) | bit(6) | ... // set  pinnen 4 tot 7 als uitgang
+  88:	91 b3       	in	r25, 0x11	; 17
+  8a:	90 6f       	ori	r25, 0xF0	; 240
+  8c:	91 bb       	out	0x11, r25	; 17
+		PORTA |= 0xff;
+  8e:	9b b3       	in	r25, 0x1b	; 27
+  90:	8b bb       	out	0x1b, r24	; 27
+		PORTB |= 0x00;
+  92:	88 b3       	in	r24, 0x18	; 24
+  94:	88 bb       	out	0x18, r24	; 24
+		PORTC |= 0x00;
+  96:	85 b3       	in	r24, 0x15	; 21
+  98:	85 bb       	out	0x15, r24	; 21
+		PORTD |= 0x00;
+  9a:	82 b3       	in	r24, 0x12	; 18
+  9c:	82 bb       	out	0x12, r24	; 18
+  9e:	08 95       	ret
+
+000000a0 <Print>:
+
+}
+void Print(char Matrix[x_size][y_size])
+{
+  a0:	58 e0       	ldi	r21, 0x08	; 8
+  a2:	70 e0       	ldi	r23, 0x00	; 0
+  a4:	60 e0       	ldi	r22, 0x00	; 0
+  a6:	10 c0       	rjmp	.+32     	; 0xc8 <Print+0x28>
+	for (uint8_t i = 0;i<8;i++)
+	{
+		for (uint8_t j =0;j<8;j++)
+		{
+			while ( !(UCSRA & (bit(UDRE))) ) {};				// Do nothing until UDR is ready for more data to be written to it
+  a8:	5d 9b       	sbis	0x0b, 5	; 11
+  aa:	fe cf       	rjmp	.-4      	; 0xa8 <Print+0x8>
+  ac:	fc 01       	movw	r30, r24
+  ae:	e2 0f       	add	r30, r18
+  b0:	f3 1f       	adc	r31, r19
+			UDR = Matrix[j][i];									// Stuur de data terug
+  b2:	40 81       	ld	r20, Z
+  b4:	4c b9       	out	0x0c, r20	; 12
+  b6:	28 5f       	subi	r18, 0xF8	; 248
+  b8:	3f 4f       	sbci	r19, 0xFF	; 255
+}
+void Print(char Matrix[x_size][y_size])
+{
+	for (uint8_t i = 0;i<8;i++)
+	{
+		for (uint8_t j =0;j<8;j++)
+  ba:	20 34       	cpi	r18, 0x40	; 64
+  bc:	31 05       	cpc	r19, r1
+  be:	a1 f7       	brne	.-24     	; 0xa8 <Print+0x8>
+  c0:	51 50       	subi	r21, 0x01	; 1
+  c2:	01 96       	adiw	r24, 0x01	; 1
+		PORTD |= 0x00;
+
+}
+void Print(char Matrix[x_size][y_size])
+{
+	for (uint8_t i = 0;i<8;i++)
+  c4:	55 23       	and	r21, r21
+  c6:	19 f0       	breq	.+6      	; 0xce <Print+0x2e>
+		PORTC |= 0x00;
+		PORTD |= 0x00;
+
+}
+void Print(char Matrix[x_size][y_size])
+{
+  c8:	27 2f       	mov	r18, r23
+  ca:	36 2f       	mov	r19, r22
+  cc:	ed cf       	rjmp	.-38     	; 0xa8 <Print+0x8>
+  ce:	08 95       	ret
+
+000000d0 <Sturing>:
+			UDR = Matrix[j][i];									// Stuur de data terug
+		}
+	}
+}
+void Sturing(char Matrix[x_size][y_size])
+{
+  d0:	cf 93       	push	r28
+  d2:	df 93       	push	r29
+		// links
+		
+		PORTA &= ~bit(1);
+  d4:	d9 98       	cbi	0x1b, 1	; 27
+  d6:	a8 2f       	mov	r26, r24
+  d8:	b9 2f       	mov	r27, r25
+  da:	e8 2f       	mov	r30, r24
+  dc:	f9 2f       	mov	r31, r25
+		for(uint8_t i = 0 ; i < 8 ; i++) 
+  de:	80 e0       	ldi	r24, 0x00	; 0
+		{
+			if(Matrix[0][i] == '1') PORTA |= bit(6);
+  e0:	9d 91       	ld	r25, X+
+  e2:	91 33       	cpi	r25, 0x31	; 49
+  e4:	11 f4       	brne	.+4      	; 0xea <Sturing+0x1a>
+  e6:	de 9a       	sbi	0x1b, 6	; 27
+  e8:	01 c0       	rjmp	.+2      	; 0xec <Sturing+0x1c>
+			else PORTA &= ~bit(6);
+  ea:	de 98       	cbi	0x1b, 6	; 27
+			if(Matrix[i][0] == '1') PORTA |= bit(7);
+  ec:	90 81       	ld	r25, Z
+  ee:	91 33       	cpi	r25, 0x31	; 49
+  f0:	11 f4       	brne	.+4      	; 0xf6 <Sturing+0x26>
+  f2:	df 9a       	sbi	0x1b, 7	; 27
+  f4:	01 c0       	rjmp	.+2      	; 0xf8 <Sturing+0x28>
+			else PORTA &= ~bit(7);
+  f6:	df 98       	cbi	0x1b, 7	; 27
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  f8:	c7 e8       	ldi	r28, 0x87	; 135
+  fa:	d3 e1       	ldi	r29, 0x13	; 19
+  fc:	21 97       	sbiw	r28, 0x01	; 1
+  fe:	f1 f7       	brne	.-4      	; 0xfc <Sturing+0x2c>
+ 100:	00 c0       	rjmp	.+0      	; 0x102 <Sturing+0x32>
+ 102:	00 00       	nop
+			//rising edge op de clk
+			_delay_ms(20);
+			PORTA |= bit(1);
+ 104:	d9 9a       	sbi	0x1b, 1	; 27
+ 106:	c7 e8       	ldi	r28, 0x87	; 135
+ 108:	d3 e1       	ldi	r29, 0x13	; 19
+ 10a:	21 97       	sbiw	r28, 0x01	; 1
+ 10c:	f1 f7       	brne	.-4      	; 0x10a <Sturing+0x3a>
+ 10e:	00 c0       	rjmp	.+0      	; 0x110 <Sturing+0x40>
+ 110:	00 00       	nop
+			//clk terug naar beneden
+			_delay_ms(20);
+			PORTA &= ~bit(1);
+ 112:	d9 98       	cbi	0x1b, 1	; 27
+ 114:	c7 e8       	ldi	r28, 0x87	; 135
+ 116:	d3 e1       	ldi	r29, 0x13	; 19
+ 118:	21 97       	sbiw	r28, 0x01	; 1
+ 11a:	f1 f7       	brne	.-4      	; 0x118 <Sturing+0x48>
+ 11c:	00 c0       	rjmp	.+0      	; 0x11e <Sturing+0x4e>
+ 11e:	00 00       	nop
+void Sturing(char Matrix[x_size][y_size])
+{
+		// links
+		
+		PORTA &= ~bit(1);
+		for(uint8_t i = 0 ; i < 8 ; i++) 
+ 120:	8f 5f       	subi	r24, 0xFF	; 255
+ 122:	38 96       	adiw	r30, 0x08	; 8
+ 124:	88 30       	cpi	r24, 0x08	; 8
+ 126:	e1 f6       	brne	.-72     	; 0xe0 <Sturing+0x10>
+			_delay_ms(20);
+			PORTA &= ~bit(1);
+			_delay_ms(20);
+			//set data lijn juist		
+	}
+}
+ 128:	df 91       	pop	r29
+ 12a:	cf 91       	pop	r28
+ 12c:	08 95       	ret
+
+0000012e <main>:
+void Print(char [x_size][y_size]);
+void Sturing(char [x_size][y_size]);
+void Convertie(char [x_size][y_size]);
+// poof there we go
+int main (void)
+{
+ 12e:	cf 93       	push	r28
+ 130:	df 93       	push	r29
+ 132:	cd b7       	in	r28, 0x3d	; 61
+ 134:	de b7       	in	r29, 0x3e	; 62
+ 136:	c0 54       	subi	r28, 0x40	; 64
+ 138:	d1 09       	sbc	r29, r1
+ 13a:	0f b6       	in	r0, 0x3f	; 63
+ 13c:	f8 94       	cli
+ 13e:	de bf       	out	0x3e, r29	; 62
+ 140:	0f be       	out	0x3f, r0	; 63
+ 142:	cd bf       	out	0x3d, r28	; 61
+	Configuration();
+ 144:	0e 94 36 00 	call	0x6c	; 0x6c <Configuration>
+	char ReceivedByte;
+	char Matrix[8][8];
+	uint8_t x = 0;
+	uint8_t y = 0;
+ 148:	90 e0       	ldi	r25, 0x00	; 0
+int main (void)
+{
+	Configuration();
+	char ReceivedByte;
+	char Matrix[8][8];
+	uint8_t x = 0;
+ 14a:	80 e0       	ldi	r24, 0x00	; 0
+			if(!(x < x_size)) {
+				y++;
+				x =0;
+				if(!(y < y_size)){
+					x = 0;
+					y =0;
+ 14c:	10 e0       	ldi	r17, 0x00	; 0
+ 14e:	01 c0       	rjmp	.+2      	; 0x152 <main+0x24>
+			ReceivedByte = UDR;
+			Matrix[x][y] = ReceivedByte;
+			x++;
+			if(!(x < x_size)) {
+				y++;
+				x =0;
+ 150:	81 2f       	mov	r24, r17
+	char Matrix[8][8];
+	uint8_t x = 0;
+	uint8_t y = 0;
+		while(1) // Loop forever
+		{			
+			while (!(UCSRA & (1<<RXC)));
+ 152:	5f 9b       	sbis	0x0b, 7	; 11
+ 154:	fe cf       	rjmp	.-4      	; 0x152 <main+0x24>
+			ReceivedByte = UDR;
+ 156:	2c b1       	in	r18, 0x0c	; 12
+			Matrix[x][y] = ReceivedByte;
+ 158:	e9 2f       	mov	r30, r25
+ 15a:	f0 e0       	ldi	r31, 0x00	; 0
+ 15c:	38 e0       	ldi	r19, 0x08	; 8
+ 15e:	83 9f       	mul	r24, r19
+ 160:	e0 0d       	add	r30, r0
+ 162:	f1 1d       	adc	r31, r1
+ 164:	11 24       	eor	r1, r1
+ 166:	41 e0       	ldi	r20, 0x01	; 1
+ 168:	50 e0       	ldi	r21, 0x00	; 0
+ 16a:	4c 0f       	add	r20, r28
+ 16c:	5d 1f       	adc	r21, r29
+ 16e:	e4 0f       	add	r30, r20
+ 170:	f5 1f       	adc	r31, r21
+ 172:	20 83       	st	Z, r18
+			x++;
+ 174:	8f 5f       	subi	r24, 0xFF	; 255
+			if(!(x < x_size)) {
+ 176:	88 30       	cpi	r24, 0x08	; 8
+ 178:	60 f3       	brcs	.-40     	; 0x152 <main+0x24>
+				y++;
+ 17a:	9f 5f       	subi	r25, 0xFF	; 255
+				x =0;
+				if(!(y < y_size)){
+ 17c:	98 30       	cpi	r25, 0x08	; 8
+ 17e:	40 f3       	brcs	.-48     	; 0x150 <main+0x22>
+					x = 0;
+					y =0;
+					Print(Matrix);
+ 180:	ca 01       	movw	r24, r20
+ 182:	0e 94 50 00 	call	0xa0	; 0xa0 <Print>
+					Sturing(Matrix);
+ 186:	ce 01       	movw	r24, r28
+ 188:	01 96       	adiw	r24, 0x01	; 1
+ 18a:	0e 94 68 00 	call	0xd0	; 0xd0 <Sturing>
+			if(!(x < x_size)) {
+				y++;
+				x =0;
+				if(!(y < y_size)){
+					x = 0;
+					y =0;
+ 18e:	91 2f       	mov	r25, r17
+			x++;
+			if(!(x < x_size)) {
+				y++;
+				x =0;
+				if(!(y < y_size)){
+					x = 0;
+ 190:	81 2f       	mov	r24, r17
+ 192:	df cf       	rjmp	.-66     	; 0x152 <main+0x24>
+
+00000194 <_exit>:
+ 194:	f8 94       	cli
+
+00000196 <__stop_program>:
+ 196:	ff cf       	rjmp	.-2      	; 0x196 <__stop_program>
